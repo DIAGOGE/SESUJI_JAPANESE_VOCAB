@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本語 단어 맞추기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #d32f2f;
+            --secondary: #1a237e;
+            --accent: #ff6f00;
+            --bg: #fef5e7;
+            --card-bg: #ffffff;
+            --text: #212121;
+            --shadow: rgba(0, 0, 0, 0.15);
+            --correct: #2e7d32;
+            --incorrect: #c62828;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #fef5e7 0%, #fff3e0 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        h1 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px var(--shadow);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            opacity: 0.8;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease;
+        }
+
+        .stat-box {
+            background: var(--card-bg);
+            padding: 15px 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px var(--shadow);
+            border-left: 4px solid var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .game-area {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 30px var(--shadow);
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        .question-box {
+            margin-bottom: 30px;
+        }
+
+        .word-reading {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 1.8rem;
+            color: #666;
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: 400;
+            letter-spacing: 2px;
+        }
+
+        .word-japanese {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8eaf6 0%, #f5f5f5 100%);
+            border-radius: 15px;
+            border: 3px solid var(--secondary);
+        }
+
+        .hint {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .option-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--shadow);
+            border-color: var(--accent);
+        }
+
+        .option-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
+            border-color: var(--correct);
+            animation: pulse 0.5s ease;
+        }
+
+        .option-btn.incorrect {
+            background: linear-gradient(135deg, #ffcdd2 0%, #ef9a9a 100%);
+            border-color: var(--incorrect);
+            animation: shake 0.5s ease;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #c62828 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #0d47a1 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .feedback {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            min-height: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .feedback.correct {
+            color: var(--correct);
+        }
+
+        .feedback.incorrect {
+            color: var(--incorrect);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--primary) 100%);
+            transition: width 0.5s ease;
+        }
+
+        .game-complete {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .game-complete h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 20px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .word-reading { font-size: 1.4rem; }
+            .word-japanese { font-size: 2rem; }
+            .options { grid-template-columns: 1fr; }
+            .stats { flex-direction: column; gap: 15px; }
+            .game-area { padding: 20px; }
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: var(--accent);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>日本語 단어 맞추기</h1>
+            <p class="subtitle">일본어 단어와 뜻을 매칭해보세요</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">정답</div>
+                <div class="stat-value" id="correct-count">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">오답</div>
+                <div class="stat-value" id="incorrect-count">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">진행률</div>
+                <div class="stat-value" id="progress-text">0%</div>
+            </div>
+        </div>
+
+        <div class="game-area" id="game-area">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+
+            <div class="question-box">
+                <div class="word-reading" id="word-reading"></div>
+                <div class="word-japanese" id="word-japanese"></div>
+                <div class="hint" id="hint"></div>
+            </div>
+
+            <div class="options" id="options"></div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="next-btn" style="display: none;">다음 문제</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const words = [
+            { word: "かみかくし", reading: "神隠し", meaning: "(어린이 등이) 갑자기 행방불명이 되는 일", category: "명사" },
+            { word: "さしかかる", reading: "差(し)掛かる", meaning: "다다르다; 당도하다", category: "동사" },
+            { word: "こんい", reading: "懇意", meaning: "친히 지냄; 친한 사이", category: "명사" },
+            { word: "しにせ", reading: "老舗", meaning: "노포; 전통 있는 유명 가게", category: "명사" },
+            { word: "ちょうほう", reading: "重宝", meaning: "편리하고 도움이 되는 것", category: "명사" },
+            { word: "こける", reading: "転ける", meaning: "쓰러지다; 넘어지다", category: "동사" },
+            { word: "げせわ", reading: "下世話", meaning: "항간에서 흔히 하는 말", category: "명사" },
+            { word: "うってつけ", reading: "打って付け", meaning: "꼭 알맞음; 안성맞춤", category: "표현" },
+            { word: "めんくらう", reading: "面食らう", meaning: "당황하다; 허둥대다", category: "동사" },
+            { word: "くえない", reading: "食えない", meaning: "교활하여 방심할 수 없다", category: "형용사" },
+            { word: "かいわい", reading: "界隈", meaning: "근처; 부근; 일대", category: "명사" },
+            { word: "やんちゃ", reading: "やんちゃ", meaning: "응석을 부림; 떼를 쓰거나 장난을 침", category: "명사" },
+            { word: "ひやかし", reading: "冷やかし", meaning: "놀림; 또, 놀리는 사람", category: "명사" },
+            { word: "ぼうよみ", reading: "棒読み", meaning: "구두점이나 억양을 무시하고 단조롭게 읽어내림", category: "명사" },
+            { word: "とりやめ", reading: "取り止め", meaning: "예정했던 일을 그만둠; 중지", category: "명사" },
+            { word: "まえだおし", reading: "前倒し", meaning: "예정 시기를 앞당겨서 실행하는 것", category: "명사" },
+            { word: "とおりすがり", reading: "通りすがり", meaning: "지나는 길", category: "명사" },
+            { word: "しぶる", reading: "渋る", meaning: "주저주저하다; 꺼리다; 망설이다", category: "동사" },
+            { word: "さしでがましい", reading: "差し出がましい", meaning: "주제넘다; 중뿔나다; 오지랖이 넓다", category: "형용사" },
+            { word: "はばかる", reading: "憚る", meaning: "거리끼다; 꺼리다", category: "동사" },
+            { word: "くだける", reading: "砕ける", meaning: "부서지다; 깨지다", category: "동사" },
+            { word: "さっしがつく", reading: "察しがつく", meaning: "짐작이 가다", category: "표현" },
+            { word: "つかみどころがない", reading: "つかみ所がない", meaning: "막연하다; 종잡을 수 없다", category: "표현" },
+            { word: "あいそをつかす", reading: "愛想を尽かす", meaning: "정이 떨어지다; 정나미가 떨어지다", category: "표현" },
+            { word: "かけずりまわる", reading: "駆けずり回る", meaning: "여기저기 뛰어다니다", category: "동사" },
+            { word: "めせん", reading: "目線", meaning: "눈길; 시선", category: "명사" },
+            { word: "しおどき", reading: "潮時", meaning: "기회; 적당한 때", category: "명사" },
+            { word: "みせじまい", reading: "店仕舞い", meaning: "가게를 닫음; 폐업함", category: "명사" },
+            { word: "おをひく", reading: "尾を引く", meaning: "꼬리를 끌다", category: "표현" },
+            { word: "ほのぐらい", reading: "ほの暗い", meaning: "어두컴컴하다; 어슴푸레하다", category: "형용사" },
+            { word: "ありしひ", reading: "在りし日", meaning: "지난날; 고인의 생전", category: "명사" },
+            { word: "たずさわる", reading: "携わる", meaning: "관계하다; 종사하다; 관여하다", category: "동사" },
+            { word: "したうけ", reading: "下請け", meaning: "하청", category: "명사" },
+            { word: "そえん", reading: "疎遠", meaning: "소원; 관계가 서먹한 것", category: "명사" },
+            { word: "とらわれる", reading: "捕らわれる", meaning: "붙잡히다; 얽매이다", category: "동사" },
+            { word: "さっこん", reading: "昨今", meaning: "작금; 요즈음", category: "명사" },
+            { word: "けんそう", reading: "喧騒", meaning: "떠들썩함; 소란함", category: "명사" },
+            { word: "しいれる", reading: "仕入れる", meaning: "사들이다; 매입하다", category: "동사" },
+            { word: "あさる", reading: "漁る", meaning: "찾아다니다; 찾아내다", category: "동사" },
+            { word: "かくばる", reading: "角ばる", meaning: "네모지다; 긴장하다; 모나다", category: "동사" },
+            { word: "しゃれにならない", reading: "洒落にならない", meaning: "농담으로 넘길 수 없다", category: "표현" },
+            { word: "たあいない", reading: "他愛無い", meaning: "정신이 없다; 하잘것없다", category: "형용사" },
+            { word: "あらし", reading: "荒らし", meaning: "트롤링; 도배; 악플러", category: "명사" },
+            { word: "あぶれる", reading: "溢れる", meaning: "일자리를 구하지 못하다; 실직하다", category: "동사" },
+            { word: "やりて", reading: "やり手", meaning: "수완가; 민완가", category: "명사" },
+            { word: "むるい", reading: "無類", meaning: "무류; 비길 데 없음", category: "명사" },
+            { word: "あらかじめ", reading: "予め", meaning: "미리; 사전에; 앞서서", category: "부사" },
+            { word: "うらめしい", reading: "恨めしい", meaning: "원망스럽다; 유감스럽다", category: "형용사" },
+            { word: "いいよどむ", reading: "言いよどむ", meaning: "말이 막히다; 말을 머뭇거리다", category: "동사" },
+            { word: "おとしこむ", reading: "落とし込む", meaning: "안에 넣다; 빠뜨리다", category: "동사" },
+            { word: "てをかえしなをかえる", reading: "手を替え品を替える", meaning: "온갖 수단을 다 쓰다", category: "표현" },
+            { word: "ほとばしる", reading: "迸る", meaning: "용솟음치다; 샘솟다; 내뿜다", category: "동사" },
+            { word: "こつをつかむ", reading: "こつを摑む", meaning: "요령을 파악하다", category: "표현" },
+            { word: "ちわ", reading: "痴話", meaning: "정담; 사랑 속삭임", category: "명사" },
+            { word: "いわく", reading: "曰く", meaning: "가라사대; 가로되; 왈", category: "부사" },
+            { word: "みつくろう", reading: "見繕う", meaning: "적당한 것을 골라 갖추다", category: "동사" },
+            { word: "じゃり", reading: "砂利", meaning: "자갈", category: "명사" },
+            { word: "ふるす", reading: "古巣", meaning: "옛집; 예전에 정들었던 곳", category: "명사" },
+            { word: "まどり", reading: "間取り", meaning: "방의 배치", category: "명사" },
+            { word: "たまりかねて", reading: "堪り兼ねて", meaning: "참을 수가 없어서", category: "표현" },
+            { word: "えぐみ", reading: "えぐ味", meaning: "아린 맛; 알싸한 맛", category: "명사" },
+            { word: "ようちあさがけ", reading: "夜討朝駆け", meaning: "신문 기자 등이 밤낮으로 요인을 방문하는 일", category: "명사" },
+            { word: "しょうすい", reading: "憔悴", meaning: "초췌", category: "명사" },
+            { word: "ぶれる", reading: "ぶれる", meaning: "흔들리다; 태도가 흔들리다", category: "동사" },
+            { word: "べた", reading: "べた", meaning: "뻔하고 재미없는 것", category: "명사" },
+            { word: "きりがない", reading: "限がない", meaning: "끝이 없다; 한이 없다", category: "표현" },
+            { word: "うでがなまる", reading: "腕が鈍る", meaning: "실력이 녹슬다; 기량이 떨어지다", category: "표현" },
+            { word: "ないまぜ", reading: "無い混ぜ", meaning: "여러 가지를 섞어서 하나로 만듦", category: "명사" },
+            { word: "たたみかける", reading: "畳みかける", meaning: "다그쳐 말을 붙이거나 행동을 하다", category: "동사" },
+            { word: "くだんの", reading: "件の", meaning: "앞서 말한 바; 전술한; 문제의", category: "관형사" },
+            { word: "だせい", reading: "惰性", meaning: "타성; 지금까지의 습관", category: "명사" },
+            { word: "ふたつへんじ", reading: "二つ返事", meaning: "예예하고 쾌히 승낙하는 일", category: "명사" },
+            { word: "おもわく", reading: "思わく", meaning: "생각; 의도; 기대; 예상", category: "명사" },
+            { word: "せきをきる", reading: "堰を切る", meaning: "둑을 터뜨리다", category: "표현" },
+            { word: "ちりばめる", reading: "鏤める", meaning: "아로새기다; 보석 따위를 온통 박아 넣다", category: "동사" },
+            { word: "がらんどう", reading: "がらんどう", meaning: "텅 비고 넓음", category: "명사" },
+            { word: "たれこみ", reading: "垂れ込み", meaning: "내부 고발; 밀고; 제보", category: "명사" },
+            { word: "いでたち", reading: "出で立ち", meaning: "몸차림; 복장", category: "명사" },
+            { word: "がせ", reading: "がせ", meaning: "가짜; 위조품; 거짓말", category: "명사" },
+            { word: "ねつぞう", reading: "捏造", meaning: "날조; 꾸밈; 조작", category: "명사" },
+            { word: "めざとい", reading: "目ざとい", meaning: "눈이 빠르다; 재빠르다", category: "형용사" },
+            { word: "みそじ", reading: "三十路", meaning: "서른 살", category: "명사" },
+            { word: "おっかなびっくり", reading: "おっかなびっくり", meaning: "무서워 떨면서; 벌벌 떨면서", category: "부사" },
+            { word: "うわごと", reading: "譫言", meaning: "헛소리; 잠꼬대", category: "명사" },
+            { word: "まじない", reading: "呪い", meaning: "주술; 주문", category: "명사" },
+            { word: "しゅんじゅん", reading: "逡巡", meaning: "망설임; 머뭇거림", category: "명사" },
+            { word: "いじ", reading: "意地", meaning: "마음씨; 고집; 오기", category: "명사" },
+            { word: "めぼしい", reading: "目ぼしい", meaning: "눈에 띄는; 주목할 만한", category: "형용사" },
+            { word: "ぎゃくじょう", reading: "逆上", meaning: "욱함; 앞뒤를 가리지 않고 불끈함", category: "명사" },
+            { word: "おちょうしもの", reading: "お調子者", meaning: "줏대 없이 휩쓸리는 사람", category: "명사" },
+            { word: "ほのめかす", reading: "仄めかす", meaning: "암시하다; 넌지시 비치다", category: "동사" },
+            { word: "おさらい", reading: "お浚い", meaning: "복습함; 발표회", category: "명사" },
+            { word: "おもむく", reading: "赴く", meaning: "향하여 가다", category: "동사" },
+            { word: "ようりょうをえない", reading: "要領を得ない", meaning: "요령부득이다; 말의 핵심이 없다", category: "표현" },
+            { word: "けったいな", reading: "希代な", meaning: "묘한; 이상야릇한", category: "형용사" },
+            { word: "のべつまくなし", reading: "のべつ幕無し", meaning: "쉴 새 없이; 끊임없이", category: "부사" },
+            { word: "めったうち", reading: "滅多打ち", meaning: "마구 침", category: "명사" },
+            { word: "きゅうごしらえ", reading: "急ごしらえ", meaning: "급조; 급히 만듦", category: "명사" },
+            { word: "たたり", reading: "祟り", meaning: "앙화; 신이 내리는 재앙", category: "명사" },
+            { word: "もてはやす", reading: "持て囃す", meaning: "격찬하다; 몹시 칭찬하다", category: "동사" },
+            { word: "つて", reading: "伝", meaning: "연고; 연줄; 인연", category: "명사" },
+            { word: "いつわり", reading: "偽り", meaning: "거짓말", category: "명사" },
+            { word: "せちがらい", reading: "世知辛い", meaning: "세상 살아가기가 힘들다", category: "형용사" },
+            { word: "えてして", reading: "得てして", meaning: "자칫하면; 까딱하면", category: "부사" },
+            { word: "むごい", reading: "惨い", meaning: "비참하다; 끔찍하다; 잔혹하다", category: "형용사" },
+            { word: "おくらいり", reading: "お蔵入り", meaning: "상연 예정이 중지됨; 계획이 보류됨", category: "명사" },
+            { word: "たわごと", reading: "戯言", meaning: "농담; 시시한 소리; 잠꼬대", category: "명사" },
+            { word: "めいる", reading: "滅入る", meaning: "기가 죽다; 우울해지다", category: "동사" },
+            { word: "たちいる", reading: "立ち入る", meaning: "들어가다; 끼어들다; 간섭하다", category: "동사" },
+            { word: "つぐない", reading: "償い", meaning: "보상; 보답; 속죄", category: "명사" },
+            { word: "よどみなく", reading: "淀みなく", meaning: "막힘없이; 거침없이", category: "부사" },
+            { word: "あげつらう", reading: "揚げ連らう", meaning: "사소한 문제를 비난조로 말하다", category: "동사" },
+            { word: "かいご", reading: "介護", meaning: "간호; 수발; 케어", category: "명사" },
+            { word: "きおくれ", reading: "気後れ", meaning: "기가 죽음; 주눅", category: "명사" },
+            { word: "よすが", reading: "縁", meaning: "연고; 의지; 의지할 사람", category: "명사" },
+            { word: "みそめる", reading: "見初める", meaning: "처음 보다; 첫눈에 반하다", category: "동사" },
+            { word: "よたばなし", reading: "よた話", meaning: "하찮은 이야기; 농담", category: "명사" },
+            { word: "しょうさ", reading: "証左", meaning: "증좌; 증거; 증인", category: "명사" },
+            { word: "せけんてい", reading: "世間体", meaning: "세상에 대한 체면", category: "명사" },
+            { word: "やるせない", reading: "遣る瀬無い", meaning: "기분을 풀 길이 없다; 안타깝다", category: "형용사" }
+        ];
+
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let usedWords = [];
+        let currentWord = null;
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function getRandomOptions(correctWord, count = 4) {
+            const options = [correctWord];
+            const availableWords = words.filter(w => w.word !== correctWord.word);
+            const shuffled = shuffleArray(availableWords);
+            
+            for (let i = 0; i < count - 1 && i < shuffled.length; i++) {
+                options.push(shuffled[i]);
+            }
+            
+            return shuffleArray(options);
+        }
+
+        function loadQuestion() {
+            const availableWords = words.filter(w => !usedWords.includes(w.word));
+            
+            if (availableWords.length === 0) {
+                showGameComplete();
+                return;
+            }
+
+            currentWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+            usedWords.push(currentWord.word);
+
+            document.getElementById('word-reading').textContent = currentWord.word;
+            document.getElementById('word-japanese').textContent = currentWord.reading;
+            document.getElementById('hint').textContent = `${currentWord.category}`;
+
+            const options = getRandomOptions(currentWord);
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            options.forEach(option => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option.meaning;
+                btn.onclick = () => checkAnswer(option, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('next-btn').style.display = 'none';
+            
+            updateProgress();
+        }
+
+        function checkAnswer(selectedWord, btnElement) {
+            const allButtons = document.querySelectorAll('.option-btn');
+            allButtons.forEach(btn => btn.disabled = true);
+
+            const feedbackEl = document.getElementById('feedback');
+
+            if (selectedWord.word === currentWord.word) {
+                btnElement.classList.add('correct');
+                feedbackEl.textContent = '정답입니다! 🎉';
+                feedbackEl.className = 'feedback correct';
+                correctAnswers++;
+                document.getElementById('correct-count').textContent = correctAnswers;
+            } else {
+                btnElement.classList.add('incorrect');
+                feedbackEl.textContent = `오답입니다. 정답: ${currentWord.meaning}`;
+                feedbackEl.className = 'feedback incorrect';
+                incorrectAnswers++;
+                document.getElementById('incorrect-count').textContent = incorrectAnswers;
+
+                // 정답 버튼 표시
+                allButtons.forEach(btn => {
+                    if (btn.textContent === currentWord.meaning) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            document.getElementById('next-btn').style.display = 'block';
+            currentQuestion++;
+        }
+
+        function updateProgress() {
+            const progress = (usedWords.length / words.length) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = Math.round(progress) + '%';
+        }
+
+        function showGameComplete() {
+            const gameArea = document.getElementById('game-area');
+            const totalQuestions = correctAnswers + incorrectAnswers;
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+
+            gameArea.innerHTML = `
+                <div class="game-complete">
+                    <h2>🎊 게임 완료! 🎊</h2>
+                    <div class="final-score">${accuracy}%</div>
+                    <p style="font-size: 1.2rem; margin: 20px 0;">
+                        정답: ${correctAnswers}개<br>
+                        오답: ${incorrectAnswers}개<br>
+                        총 문제: ${totalQuestions}개
+                    </p>
+                    <button class="btn btn-primary" onclick="restartGame()">다시 시작</button>
+                </div>
+            `;
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            usedWords = [];
+            currentWord = null;
+            
+            document.getElementById('correct-count').textContent = '0';
+            document.getElementById('incorrect-count').textContent = '0';
+            
+            const gameArea = document.getElementById('game-area');
+            gameArea.innerHTML = `
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div class="question-box">
+                    <div class="word-reading" id="word-reading"></div>
+                    <div class="word-japanese" id="word-japanese"></div>
+                    <div class="hint" id="hint"></div>
+                </div>
+
+                <div class="options" id="options"></div>
+
+                <div class="feedback" id="feedback"></div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" id="next-btn" style="display: none;">다음 문제</button>
+                </div>
+            `;
+            
+            document.getElementById('next-btn').onclick = loadQuestion;
+            loadQuestion();
+        }
+
+        document.getElementById('next-btn').onclick = loadQuestion;
+        loadQuestion();
+    </script>
+</body>
+</html>
